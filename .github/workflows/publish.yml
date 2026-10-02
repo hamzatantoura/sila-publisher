@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
+    inputs:
+      command:
+        description: "run = نشر ما حان وقته، whoami = فحص المفتاح، check = فحص الطابور"
+        type: choice
+        options: [run, whoami, check]
+        default: run
 
 permissions:
   contents: write
@@ -25,7 +31,8 @@ jobs:
           META_TOKEN: ${{ secrets.META_TOKEN }}
           PAGE_ID: ${{ vars.PAGE_ID }}
           MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}
-        run: python publisher.py run
+          PYTHONIOENCODING: utf-8
+        run: python publisher.py ${{ inputs.command || 'run' }}
       - name: Save queue status
         if: always()
         run: |
