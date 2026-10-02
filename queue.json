@@ -2,6 +2,114 @@
   "timezone": "Europe/Istanbul",
   "items": [
     {
+      "id": "2026-10-04-facebook-post",
+      "kind": "post",
+      "images": [
+        "media/2026-10-04/sila-20261004-01.jpg",
+        "media/2026-10-04/sila-20261004-02.jpg",
+        "media/2026-10-04/sila-20261004-03.jpg",
+        "media/2026-10-04/sila-20261004-04.jpg",
+        "media/2026-10-04/sila-20261004-05.jpg",
+        "media/2026-10-04/sila-20261004-06.jpg",
+        "media/2026-10-04/sila-20261004-07.jpg"
+      ],
+      "caption": "طردك بيوصل مكسور؟ غالباً المشكلة بالتغليف، مو بالطريق.\n5 خطوات بسيطة بتخلّي البضاعة توصل للزبون متل ما طلعت من عندك: كرتونة على قدّ الغرض، تعبئة الفراغات، القابل للكسر لحاله، تسكير منيح، وبوليصة واضحة.\nأرسلها لتاجر بتعرفه.\n\nsila-sy.com\n#صلة #شحن_سوريا #تجارة_إلكترونية",
+      "network": "facebook",
+      "publish_at": "2026-10-04T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-04-facebook-story",
+      "kind": "story",
+      "images": [
+        "media/2026-10-04/sila-20261004-story.jpg"
+      ],
+      "caption": "",
+      "network": "facebook",
+      "publish_at": "2026-10-04T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-04-instagram-post",
+      "kind": "post",
+      "images": [
+        "media/2026-10-04/sila-20261004-01.jpg",
+        "media/2026-10-04/sila-20261004-02.jpg",
+        "media/2026-10-04/sila-20261004-03.jpg",
+        "media/2026-10-04/sila-20261004-04.jpg",
+        "media/2026-10-04/sila-20261004-05.jpg",
+        "media/2026-10-04/sila-20261004-06.jpg",
+        "media/2026-10-04/sila-20261004-07.jpg"
+      ],
+      "caption": "طردك بيوصل مكسور؟ غالباً المشكلة بالتغليف، مو بالطريق.\n5 خطوات بسيطة بتخلّي البضاعة توصل للزبون متل ما طلعت من عندك: كرتونة على قدّ الغرض، تعبئة الفراغات، القابل للكسر لحاله، تسكير منيح، وبوليصة واضحة.\nأرسلها لتاجر بتعرفه.\n\nsila-sy.com\n#صلة #شحن_سوريا #تجارة_إلكترونية",
+      "network": "instagram",
+      "publish_at": "2026-10-04T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-04-instagram-story",
+      "kind": "story",
+      "images": [
+        "media/2026-10-04/sila-20261004-story.jpg"
+      ],
+      "caption": "",
+      "network": "instagram",
+      "publish_at": "2026-10-04T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-06-facebook-post",
+      "kind": "post",
+      "images": [
+        "media/2026-10-04/sila-20261006-post.jpg"
+      ],
+      "caption": "الزبون طلب، ويوم وصلت الشحنة… الموبايل مسكّر.\nموقف بيعرفه كل تاجر. الحل بسيط: خود من الزبون رقم تاني وقت الطلب، وأكّد معه الطلب والعنوان قبل ما تشحن.\nشو أكتر شي بيرجّعلك الطلبات؟ جاوبنا بكلمة.\n\nsila-sy.com\n#صلة #شحن_سوريا #الدفع_عند_الاستلام",
+      "network": "facebook",
+      "publish_at": "2026-10-06T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-06-facebook-story",
+      "kind": "story",
+      "images": [
+        "media/2026-10-04/sila-20261006-story.jpg"
+      ],
+      "caption": "",
+      "network": "facebook",
+      "publish_at": "2026-10-06T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-06-instagram-post",
+      "kind": "post",
+      "images": [
+        "media/2026-10-04/sila-20261006-post.jpg"
+      ],
+      "caption": "الزبون طلب، ويوم وصلت الشحنة… الموبايل مسكّر.\nموقف بيعرفه كل تاجر. الحل بسيط: خود من الزبون رقم تاني وقت الطلب، وأكّد معه الطلب والعنوان قبل ما تشحن.\nشو أكتر شي بيرجّعلك الطلبات؟ جاوبنا بكلمة.\n\nsila-sy.com\n#صلة #شحن_سوريا #الدفع_عند_الاستلام",
+      "network": "instagram",
+      "publish_at": "2026-10-06T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-06-instagram-story",
+      "kind": "story",
+      "images": [
+        "media/2026-10-04/sila-20261006-story.jpg"
+      ],
+      "caption": "",
+      "network": "instagram",
+      "publish_at": "2026-10-06T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
       "id": "2026-10-11-facebook-post",
       "kind": "post",
       "images": [
