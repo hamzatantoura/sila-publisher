@@ -31,7 +31,7 @@ GRAPH = "https://graph.facebook.com/" + os.environ.get("GRAPH_VERSION", "v26.0")
 FB_SCHEDULE_MIN_LEAD = timedelta(minutes=20)
 FB_SCHEDULE_MAX_LEAD = timedelta(days=29)
 # منشور فات موعده بأكثر من هذا لا يُنشر متأخراً، بل يُعلَّم فاشلاً لينتبه المالك.
-LATE_LIMIT = timedelta(hours=3)
+LATE_LIMIT = timedelta(hours=4)  # GitHub يؤخّر التشغيل المجدول ساعات أحياناً (مقيس 3 تشرين الأول)
 MAX_ATTEMPTS = 3
 
 
