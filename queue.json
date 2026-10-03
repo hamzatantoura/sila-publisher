@@ -278,6 +278,54 @@
       "publish_at": "2026-10-15T21:00:00+03:00",
       "approved": true,
       "status": "pending"
+    },
+    {
+      "id": "2026-10-08-facebook-post",
+      "network": "facebook",
+      "kind": "post",
+      "images": [
+        "media/week-20261004/sila-20261008-post.jpg"
+      ],
+      "caption": "زبونك بالحسكة أو بدرعا أو بطرطوس؟ ما في مشكلة.\nمن حسابك على صلة بتختار شركة الشحن اللي بتغطي منطقة زبونك، وبتشحن لكل المحافظات السورية.\nسجّل، وأرسل أول شحنة.\n\nsila-sy.com\n#صلة #شحن_سوريا #الدفع_عند_الاستلام #تجارة_إلكترونية",
+      "publish_at": "2026-10-08T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-08-facebook-story",
+      "network": "facebook",
+      "kind": "story",
+      "images": [
+        "media/week-20261004/sila-20261008-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-08T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-08-instagram-post",
+      "network": "instagram",
+      "kind": "post",
+      "images": [
+        "media/week-20261004/sila-20261008-post.jpg"
+      ],
+      "caption": "زبونك بالحسكة أو بدرعا أو بطرطوس؟ ما في مشكلة.\nمن حسابك على صلة بتختار شركة الشحن اللي بتغطي منطقة زبونك، وبتشحن لكل المحافظات السورية.\nسجّل، وأرسل أول شحنة.\n\nsila-sy.com\n#صلة #شحن_سوريا #الدفع_عند_الاستلام #تجارة_إلكترونية",
+      "publish_at": "2026-10-08T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-08-instagram-story",
+      "network": "instagram",
+      "kind": "story",
+      "images": [
+        "media/week-20261004/sila-20261008-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-08T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
     }
   ]
 }
