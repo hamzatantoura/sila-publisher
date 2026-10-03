@@ -17,8 +17,13 @@
       "network": "facebook",
       "publish_at": "2026-10-04T10:00:00+03:00",
       "approved": true,
-      "status": "pending",
-      "attempts": 0
+      "status": "scheduled",
+      "attempts": 0,
+      "result": {
+        "id": "1094550123486983",
+        "fallback": "single-image: unpublished photos not permitted"
+      },
+      "done_at": "2026-10-03T17:31:19+00:00"
     },
     {
       "id": "2026-10-04-facebook-story",
@@ -129,8 +134,13 @@
       "network": "facebook",
       "publish_at": "2026-10-11T10:00:00+03:00",
       "approved": true,
-      "status": "pending",
-      "attempts": 0
+      "status": "scheduled",
+      "attempts": 0,
+      "result": {
+        "id": "1094550180153644",
+        "fallback": "single-image: unpublished photos not permitted"
+      },
+      "done_at": "2026-10-03T17:31:22+00:00"
     },
     {
       "id": "2026-10-11-facebook-story",
@@ -287,7 +297,11 @@
       "caption": "زبونك بالحسكة أو بدرعا أو بطرطوس؟ ما في مشكلة.\nمن حسابك على صلة بتختار شركة الشحن اللي بتغطي منطقة زبونك، وبتشحن لكل المحافظات السورية.\nسجّل، وأرسل أول شحنة.\n\nsila-sy.com\n#صلة #شحن_سوريا #الدفع_عند_الاستلام #تجارة_إلكترونية",
       "publish_at": "2026-10-08T10:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "scheduled",
+      "result": {
+        "id": "1094550250153637"
+      },
+      "done_at": "2026-10-03T17:31:24+00:00"
     },
     {
       "id": "2026-10-08-facebook-story",
