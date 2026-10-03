@@ -18,8 +18,8 @@
       "publish_at": "2026-10-04T10:00:00+03:00",
       "approved": true,
       "status": "failed",
-      "attempts": 1,
-      "error": "POST 106327508973515/photos → HTTP 403: {\"error\":{\"message\":\"(#200) You do not have permission to create an unpublished post\",\"type\":\"OAuthException\",\"code\":200,\"fbtrace_id\":\"AzONtBlA4DFlqFJBuiuqKT7\"}}"
+      "attempts": 2,
+      "error": "POST 106327508973515/photos → HTTP 403: {\"error\":{\"message\":\"(#200) You do not have permission to create an unpublished post\",\"type\":\"OAuthException\",\"code\":200,\"fbtrace_id\":\"AhFPHEnMrgQu8CmDotwjLOn\"}}"
     },
     {
       "id": "2026-10-04-facebook-story",
@@ -131,8 +131,8 @@
       "publish_at": "2026-10-11T10:00:00+03:00",
       "approved": true,
       "status": "failed",
-      "attempts": 1,
-      "error": "POST 106327508973515/photos → HTTP 403: {\"error\":{\"message\":\"(#200) You do not have permission to create an unpublished post\",\"type\":\"OAuthException\",\"code\":200,\"fbtrace_id\":\"AV16O8JRdgAnQq3D5JhmxpH\"}}"
+      "attempts": 2,
+      "error": "POST 106327508973515/photos → HTTP 403: {\"error\":{\"message\":\"(#200) You do not have permission to create an unpublished post\",\"type\":\"OAuthException\",\"code\":200,\"fbtrace_id\":\"AbfD-sFsb555YcxI4kzz2Rw\"}}"
     },
     {
       "id": "2026-10-11-facebook-story",
