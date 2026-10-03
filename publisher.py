@@ -39,6 +39,10 @@ class GraphError(Exception):
     pass
 
 
+class PermanentError(Exception):
+    """خطأ لن تحلّه إعادة المحاولة: يُعلَّم العنصر فاشلاً نهائياً من أول مرة."""
+
+
 def api(method, path, token, **params):
     params["access_token"] = token
     body = urllib.parse.urlencode(params)
@@ -99,7 +103,17 @@ def fb_post(page_id, token, item, schedule_ts=None):
         return api("POST", f"{page_id}/photos", token, **params)
     # منشور متعدد الصور: ترفع الصور غير منشورة ثم تُرفق بمنشور واحد.
     extra = {"temporary": "true"} if schedule_ts else {}
-    ids = [fb_upload_photo(page_id, token, p, **extra) for p in images]
+    try:
+        ids = [fb_upload_photo(page_id, token, p, **extra) for p in images]
+    except GraphError as e:
+        # تطبيق في وضع التطوير لا يُسمح له بصور غير منشورة: (#200) … create an unpublished post.
+        # البديل: الشريحة الأولى منشوراً واحداً مع النص كاملاً (الكاروسيل يبقى كاملاً على إنستغرام).
+        if "(#200)" not in str(e) or "unpublished" not in str(e):
+            raise
+        single = dict(item, images=images[:1])
+        res = fb_post(page_id, token, single, schedule_ts)
+        res["fallback"] = "single-image: unpublished photos not permitted"
+        return res
     params = {
         "message": item["caption"],
         "attached_media": json.dumps([{"media_fbid": i} for i in ids]),
@@ -109,7 +123,13 @@ def fb_post(page_id, token, item, schedule_ts=None):
 
 
 def fb_story(page_id, token, item):
-    photo_id = fb_upload_photo(page_id, token, item["images"][0])
+    try:
+        photo_id = fb_upload_photo(page_id, token, item["images"][0])
+    except GraphError as e:
+        if "(#200)" in str(e) and "unpublished" in str(e):
+            # لا جدوى من إعادة المحاولة: القيد من وضع التطبيق لا من الشبكة.
+            raise PermanentError("ستوري فيسبوك يحتاج تطبيقاً في الوضع الحيّ (Live): " + str(e)[:200]) from None
+        raise
     return api("POST", f"{page_id}/photo_stories", token, photo_id=photo_id)
 
 
@@ -273,7 +293,7 @@ def cmd_run():
             print(f"✓ {item['id']} → {item['status']} {res}")
         except Exception as e:
             item["status"] = "failed"
-            item["attempts"] = item.get("attempts", 0) + 1
+            item["attempts"] = MAX_ATTEMPTS if isinstance(e, PermanentError) else item.get("attempts", 0) + 1
             item["error"] = str(e)[:600]
             failures += 1
             print(f"✗ {item['id']}: {e}")
