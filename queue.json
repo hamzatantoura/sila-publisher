@@ -343,6 +343,162 @@
       "publish_at": "2026-10-08T21:00:00+03:00",
       "approved": true,
       "status": "pending"
+    },
+    {
+      "id": "2026-10-18-facebook-post",
+      "network": "facebook",
+      "kind": "post",
+      "images": [
+        "media/week-20261018/sila-20261018-01.jpg",
+        "media/week-20261018/sila-20261018-02.jpg",
+        "media/week-20261018/sila-20261018-03.jpg",
+        "media/week-20261018/sila-20261018-04.jpg",
+        "media/week-20261018/sila-20261018-05.jpg",
+        "media/week-20261018/sila-20261018-06.jpg",
+        "media/week-20261018/sila-20261018-07.jpg"
+      ],
+      "caption": "أول شحنة على صلة أسهل مما بتتوقع: 5 خطوات من توثيق حسابك لحد ما تسلّم الطرد لشركة الشحن.\nاحفظ البوست وارجعله وقت تبلّش، وإذا علقت بخطوة اكتبلنا بالتعليقات.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #الدفع_عند_الاستلام #تجارة_إلكترونية",
+      "publish_at": "2026-10-18T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-18-facebook-story",
+      "network": "facebook",
+      "kind": "story",
+      "images": [
+        "media/week-20261018/sila-20261018-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-18T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-18-instagram-post",
+      "network": "instagram",
+      "kind": "post",
+      "images": [
+        "media/week-20261018/sila-20261018-01.jpg",
+        "media/week-20261018/sila-20261018-02.jpg",
+        "media/week-20261018/sila-20261018-03.jpg",
+        "media/week-20261018/sila-20261018-04.jpg",
+        "media/week-20261018/sila-20261018-05.jpg",
+        "media/week-20261018/sila-20261018-06.jpg",
+        "media/week-20261018/sila-20261018-07.jpg"
+      ],
+      "caption": "أول شحنة على صلة أسهل مما بتتوقع: 5 خطوات من توثيق حسابك لحد ما تسلّم الطرد لشركة الشحن.\nاحفظ البوست وارجعله وقت تبلّش، وإذا علقت بخطوة اكتبلنا بالتعليقات.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #الدفع_عند_الاستلام #تجارة_إلكترونية",
+      "publish_at": "2026-10-18T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-18-instagram-story",
+      "network": "instagram",
+      "kind": "story",
+      "images": [
+        "media/week-20261018/sila-20261018-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-18T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-20-facebook-post",
+      "network": "facebook",
+      "kind": "post",
+      "images": [
+        "media/week-20261018/sila-20261020-post.jpg"
+      ],
+      "caption": "«مصاريي وين صارت؟» سؤال كل تاجر بيشتغل بالدفع عند الاستلام.\nبمحفظتك على صلة بتشوف مبالغك موزّعة: «قيد التحصيل»، «جاهز للدفع»، «مستحق في الدفعة القادمة»، و«الرصيد المتوقع»، ومعها كشف حساب بتنزّله.\n\nsila-sy.com\n\n#صلة #الدفع_عند_الاستلام #شحن_سوريا #محفظة_التاجر",
+      "publish_at": "2026-10-20T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-20-facebook-story",
+      "network": "facebook",
+      "kind": "story",
+      "images": [
+        "media/week-20261018/sila-20261020-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-20T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-20-instagram-post",
+      "network": "instagram",
+      "kind": "post",
+      "images": [
+        "media/week-20261018/sila-20261020-post.jpg"
+      ],
+      "caption": "«مصاريي وين صارت؟» سؤال كل تاجر بيشتغل بالدفع عند الاستلام.\nبمحفظتك على صلة بتشوف مبالغك موزّعة: «قيد التحصيل»، «جاهز للدفع»، «مستحق في الدفعة القادمة»، و«الرصيد المتوقع»، ومعها كشف حساب بتنزّله.\n\nsila-sy.com\n\n#صلة #الدفع_عند_الاستلام #شحن_سوريا #محفظة_التاجر",
+      "publish_at": "2026-10-20T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-20-instagram-story",
+      "network": "instagram",
+      "kind": "story",
+      "images": [
+        "media/week-20261018/sila-20261020-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-20T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-22-facebook-post",
+      "network": "facebook",
+      "kind": "post",
+      "images": [
+        "media/week-20261018/sila-20261022-post.jpg"
+      ],
+      "caption": "ما في داعي تتصل بشركة الشحن لتعرف وين طلبيتك.\nحالة كل شحنة بتتحدّث لحالها بلوحتك على صلة، وبيوصلك إشعار مع كل تغيير.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تتبع_الشحنات #تجارة_إلكترونية",
+      "publish_at": "2026-10-22T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-22-facebook-story",
+      "network": "facebook",
+      "kind": "story",
+      "images": [
+        "media/week-20261018/sila-20261022-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-22T10:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-22-instagram-post",
+      "network": "instagram",
+      "kind": "post",
+      "images": [
+        "media/week-20261018/sila-20261022-post.jpg"
+      ],
+      "caption": "ما في داعي تتصل بشركة الشحن لتعرف وين طلبيتك.\nحالة كل شحنة بتتحدّث لحالها بلوحتك على صلة، وبيوصلك إشعار مع كل تغيير.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تتبع_الشحنات #تجارة_إلكترونية",
+      "publish_at": "2026-10-22T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
+    },
+    {
+      "id": "2026-10-22-instagram-story",
+      "network": "instagram",
+      "kind": "story",
+      "images": [
+        "media/week-20261018/sila-20261022-story.jpg"
+      ],
+      "caption": "",
+      "publish_at": "2026-10-22T21:00:00+03:00",
+      "approved": true,
+      "status": "pending"
     }
   ]
 }
