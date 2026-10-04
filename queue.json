@@ -58,7 +58,11 @@
       "network": "instagram",
       "publish_at": "2026-10-04T21:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "published",
+      "result": {
+        "id": "18147480610563141"
+      },
+      "done_at": "2026-10-04T18:25:16+00:00"
     },
     {
       "id": "2026-10-04-instagram-story",
@@ -70,7 +74,11 @@
       "network": "instagram",
       "publish_at": "2026-10-04T21:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "published",
+      "result": {
+        "id": "18414939418086868"
+      },
+      "done_at": "2026-10-04T18:25:30+00:00"
     },
     {
       "id": "2026-10-06-facebook-post",
