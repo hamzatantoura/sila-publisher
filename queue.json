@@ -35,7 +35,12 @@
       "network": "facebook",
       "publish_at": "2026-10-04T10:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "published",
+      "result": {
+        "success": true,
+        "post_id": "1857351348968956"
+      },
+      "done_at": "2026-10-04T08:50:37+00:00"
     },
     {
       "id": "2026-10-04-instagram-post",
