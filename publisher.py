@@ -3,19 +3,24 @@
 الأوامر:
   python publisher.py check    فحص الطابور والصور بلا اتصال بـ Meta
   python publisher.py whoami   فحص المفتاح: اسم الصفحة وحساب إنستغرام وحصة النشر
-  python publisher.py run      نشر أو جدولة ما حان وقته (يشغّله GitHub Actions كل 15 دقيقة)
+  python publisher.py run      نشر أو جدولة ما حان وقته، مرة واحدة
+  python publisher.py loop     «مناوبة»: يكرر run كل دقيقتين قرابة 5 ساعات ونصف، ويحفظ الحالة
+                               في المستودع بعد كل تغيير. يشغّله GitHub Actions، وكل مناوبة تبدأ التالية.
 
 متغيرات البيئة:
   META_TOKEN      مفتاح مستخدم النظام (سرّي، يُحفظ في GitHub Secrets فقط)
   PAGE_ID         معرّف صفحة فيسبوك
   MEDIA_BASE_URL  الرابط العام لجذر المستودع، تُبنى منه روابط الصور
   GRAPH_VERSION   اختياري، الافتراضي v26.0
+  GITHUB_TOKEN, GITHUB_REPOSITORY  من GitHub Actions: لفتح Issue تنبيه عند الفشل
+  LOOP_MINUTES    اختياري، مدة المناوبة، الافتراضي 330
 
 لا يعتمد إلا على مكتبة بايثون القياسية، حتى يعمل على GitHub Actions بلا تثبيت.
 """
 import json
 import os
 import struct
+import subprocess
 import sys
 import time
 import urllib.error
@@ -31,8 +36,11 @@ GRAPH = "https://graph.facebook.com/" + os.environ.get("GRAPH_VERSION", "v26.0")
 FB_SCHEDULE_MIN_LEAD = timedelta(minutes=20)
 FB_SCHEDULE_MAX_LEAD = timedelta(days=29)
 # منشور فات موعده بأكثر من هذا لا يُنشر متأخراً، بل يُعلَّم فاشلاً لينتبه المالك.
-LATE_LIMIT = timedelta(hours=4)  # GitHub يؤخّر التشغيل المجدول ساعات أحياناً (مقيس 3 تشرين الأول)
+# المناوبات المتصلة تجعل التأخير دقائق؛ الهامش الواسع لانقطاع نادر في GitHub فقط.
+LATE_LIMIT = timedelta(hours=12)
 MAX_ATTEMPTS = 3
+RETRY_AFTER = timedelta(minutes=15)  # مهلة بين محاولات العنصر الفاشل
+LOOP_SLEEP = 120  # ثوانٍ بين دورات المناوبة
 
 
 class GraphError(Exception):
@@ -93,33 +101,31 @@ def fb_upload_photo(page_id, token, path, **extra):
 
 
 def fb_post(page_id, token, item, schedule_ts=None):
-    sched = {}
-    if schedule_ts:
-        sched = {"published": "false", "scheduled_publish_time": str(schedule_ts)}
+    """منشور صورة واحدة يُجدول على خوادم Meta. منشور متعدد الصور يُنشر في موعده فقط (schedule_ts=None)."""
     images = item["images"]
     if len(images) == 1:
         params = {"url": media_url(images[0]), "message": item["caption"]}
-        params.update(sched)
+        if schedule_ts:
+            params.update(published="false", scheduled_publish_time=str(schedule_ts))
         return api("POST", f"{page_id}/photos", token, **params)
-    # منشور متعدد الصور: ترفع الصور غير منشورة ثم تُرفق بمنشور واحد.
-    extra = {"temporary": "true"} if schedule_ts else {}
+    if schedule_ts:
+        raise ValueError("منشور فيسبوك متعدد الصور لا يُجدول مسبقاً")
+    # الصور تُرفع غير منشورة ثم تُرفق بمنشور واحد يُنشر فوراً.
+    # لا نستعمل temporary=true (اللازمة للجدولة): Meta رفضتها لهذه الصفحة بـ
+    # «(#200) You do not have permission to create an unpublished post» (3 و4 تشرين الأول)،
+    # بينما الرفع غير المنشور العادي ينجح (ستوري 4 تشرين الأول).
     try:
-        ids = [fb_upload_photo(page_id, token, p, **extra) for p in images]
+        ids = [fb_upload_photo(page_id, token, p) for p in images]
+        return api("POST", f"{page_id}/feed", token, message=item["caption"],
+                   attached_media=json.dumps([{"media_fbid": i} for i in ids]))
     except GraphError as e:
-        # تطبيق في وضع التطوير لا يُسمح له بصور غير منشورة: (#200) … create an unpublished post.
-        # البديل: الشريحة الأولى منشوراً واحداً مع النص كاملاً (الكاروسيل يبقى كاملاً على إنستغرام).
-        if "(#200)" not in str(e) or "unpublished" not in str(e):
+        # رفض من Meta (4xx): الشريحة الأولى منشوراً واحداً مع النص كاملاً، أفضل من لا شيء.
+        # عطل مؤقت (5xx أو شبكة): يُعاد المنشور كاملاً في محاولة لاحقة.
+        if "→ HTTP 4" not in str(e):
             raise
-        single = dict(item, images=images[:1])
-        res = fb_post(page_id, token, single, schedule_ts)
-        res["fallback"] = "single-image: unpublished photos not permitted"
+        res = fb_post(page_id, token, dict(item, images=images[:1]))
+        res["fallback"] = "single-image: " + str(e)[:300]
         return res
-    params = {
-        "message": item["caption"],
-        "attached_media": json.dumps([{"media_fbid": i} for i in ids]),
-    }
-    params.update(sched)
-    return api("POST", f"{page_id}/feed", token, **params)
 
 
 def fb_story(page_id, token, item):
@@ -245,11 +251,49 @@ def cmd_check():
     return 1 if problems else 0
 
 
+def schedulable_on_meta(item):
+    """منشور فيسبوك بصورة واحدة فقط يُجدول على خوادم Meta مسبقاً."""
+    return item["network"] == "facebook" and item["kind"] == "post" and len(item["images"]) == 1
+
+
+def actionable(item, now):
+    """هل يجب أن يفعل الناشر شيئاً بهذا العنصر الآن؟"""
+    if not item.get("approved"):
+        return False
+    if item["status"] == "failed":
+        if item.get("attempts", 0) >= MAX_ATTEMPTS:
+            return False
+        last = item.get("last_try")
+        if last and now - datetime.fromisoformat(last) < RETRY_AFTER:
+            return False
+    elif item["status"] != "pending":
+        return False
+    lead = when(item) - now
+    if schedulable_on_meta(item) and FB_SCHEDULE_MIN_LEAD <= lead <= FB_SCHEDULE_MAX_LEAD:
+        return True
+    return lead <= timedelta(0)
+
+
+def alert(title, body):
+    """يفتح Issue في المستودع، فيصل بريد GitHub إلى المالك. لا يوقف النشر إن فشل."""
+    token, repo = os.environ.get("GITHUB_TOKEN"), os.environ.get("GITHUB_REPOSITORY")
+    if not (token and repo):
+        print("تنبيه (بلا GitHub):", title)
+        return
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{repo}/issues", method="POST",
+        data=json.dumps({"title": title, "body": body}).encode(),
+        headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"})
+    try:
+        urllib.request.urlopen(req, timeout=30).close()
+    except Exception as e:
+        print("تعذّر فتح Issue التنبيه:", e)
+
+
 def cmd_run():
     queue = load_queue()
     now = datetime.now(timezone.utc)
-    due = [i for i in queue["items"] if i.get("approved") and (
-        i["status"] == "pending" or (i["status"] == "failed" and i.get("attempts", 0) < MAX_ATTEMPTS))]
+    due = [i for i in queue["items"] if actionable(i, now)]
     if not due:
         print("لا شيء للنشر الآن.")
         return 0
@@ -258,20 +302,18 @@ def cmd_run():
     for item in due:
         t = when(item)
         lead = t - now
+        item["last_try"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
         try:
-            if item["network"] == "facebook" and item["kind"] == "post" and lead >= FB_SCHEDULE_MIN_LEAD:
-                if lead > FB_SCHEDULE_MAX_LEAD:
-                    continue
+            if schedulable_on_meta(item) and lead >= FB_SCHEDULE_MIN_LEAD:
                 res = fb_post(page["id"], page_token, item, schedule_ts=int(t.timestamp()))
                 item["status"] = "scheduled"
-            elif lead > timedelta(0):
-                continue
             elif -lead > LATE_LIMIT:
                 item["status"] = "failed"
                 item["attempts"] = MAX_ATTEMPTS
                 item["error"] = f"فات الموعد بأكثر من {LATE_LIMIT}؛ لم يُنشر متأخراً"
                 failures += 1
                 print(f"✗ {item['id']}: {item['error']}")
+                alert(f"لم يُنشر {item['id']}", item["error"])
                 save_queue(queue)
                 continue
             elif item["network"] == "facebook" and item["kind"] == "post":
@@ -291,18 +333,69 @@ def cmd_run():
             item["done_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
             item.pop("error", None)
             print(f"✓ {item['id']} → {item['status']} {res}")
+            if "fallback" in res:
+                alert(f"{item['id']} نُشر بصورة واحدة بدل الكاروسيل", res["fallback"])
         except Exception as e:
             item["status"] = "failed"
             item["attempts"] = MAX_ATTEMPTS if isinstance(e, PermanentError) else item.get("attempts", 0) + 1
             item["error"] = str(e)[:600]
             failures += 1
             print(f"✗ {item['id']}: {e}")
+            if item["attempts"] >= MAX_ATTEMPTS:
+                alert(f"فشل نشر {item['id']}", f"بعد {item['attempts']} محاولات:\n\n```\n{item['error']}\n```")
         save_queue(queue)
     return 1 if failures else 0
 
 
+# ---------- المناوبة ----------
+
+def git(*args, check=True):
+    return subprocess.run(["git", *args], cwd=ROOT, check=check, capture_output=True, text=True)
+
+
+def sync_with_remote():
+    """يجلب عناصر الطابور الجديدة ويدفع حالة النشر. يعيد True إن لم يبقَ شيء غير مدفوع."""
+    branch = os.environ.get("GITHUB_REF_NAME", "main")
+    if git("pull", "--rebase", "--autostash", "-q", "origin", branch, check=False).returncode != 0:
+        git("rebase", "--abort", check=False)  # تعارض نادر: نُبقي حالتنا محلياً ونحاول في الدورة التالية
+        print("تعذّر سحب التحديثات؛ سأعيد المحاولة.")
+        return False
+    if git("rev-list", "--count", f"origin/{branch}..HEAD").stdout.strip() != "0":
+        return git("push", "-q", "origin", f"HEAD:{branch}", check=False).returncode == 0
+    return True
+
+
+def save_status():
+    git("add", "queue.json")
+    if git("diff", "--cached", "--quiet", check=False).returncode != 0:
+        git("commit", "-q", "-m", "Update publish status")
+
+
+def cmd_loop():
+    end = time.monotonic() + 60 * int(os.environ.get("LOOP_MINUTES", "330"))
+    synced = sync_with_remote()
+    while True:
+        try:
+            cmd_run()
+        except Exception as e:  # خطأ غير متوقع لا يوقف المناوبة
+            print("خطأ في الدورة:", e)
+        save_status()
+        synced = sync_with_remote()
+        if time.monotonic() + LOOP_SLEEP > end:
+            break
+        time.sleep(LOOP_SLEEP)
+    for _ in range(5):  # قبل نهاية المناوبة: لا نترك حالة نشر غير محفوظة
+        if synced:
+            return 0
+        time.sleep(20)
+        synced = sync_with_remote()
+    alert("تعذّر حفظ حالة النشر في المستودع",
+          "قد تُعاد محاولة نشر عنصر نُشر فعلاً. راجع آخر تشغيل في Actions.")
+    return 1
+
+
 if __name__ == "__main__":
-    commands = {"check": cmd_check, "run": cmd_run, "whoami": cmd_whoami}
+    commands = {"check": cmd_check, "run": cmd_run, "whoami": cmd_whoami, "loop": cmd_loop}
     if len(sys.argv) != 2 or sys.argv[1] not in commands:
         print(__doc__)
         sys.exit(2)

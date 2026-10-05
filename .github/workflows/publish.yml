@@ -1,18 +1,26 @@
 name: publish
 
+# «مناوبات» متصلة: كل تشغيل يبقى قرابة 5 ساعات ونصف يفحص الطابور كل دقيقتين،
+# ثم يبدأ التشغيل التالي بنفسه. الجدولة كل ساعة احتياط فقط إن انقطعت السلسلة.
+# مجموعة concurrency تضمن مناوبة واحدة تعمل وواحدة تنتظر على الأكثر.
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7 * * * *"
+  push:  # تحديث الكود يبدأ مناوبة فوراً (دفعات الطابور لا تبدأها، والمناوبة الجارية تسحبها بنفسها)
+    branches: [main]
+    paths: [publisher.py, .github/workflows/publish.yml]
   workflow_dispatch:
     inputs:
       command:
-        description: "run = نشر ما حان وقته، whoami = فحص المفتاح، check = فحص الطابور"
+        description: "loop = مناوبة متصلة، run = مرة واحدة، whoami = فحص المفتاح، check = فحص الطابور"
         type: choice
-        options: [run, whoami, check]
-        default: run
+        options: [loop, run, whoami, check]
+        default: loop
 
 permissions:
   contents: write
+  actions: write
+  issues: write
 
 concurrency:
   group: publish
@@ -21,22 +29,31 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Publish due posts
+        timeout-minutes: 340
         env:
           META_TOKEN: ${{ secrets.META_TOKEN }}
           PAGE_ID: ${{ vars.PAGE_ID }}
           MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ github.token }}
           PYTHONIOENCODING: utf-8
-        run: python publisher.py ${{ inputs.command || 'run' }}
-      - name: Save queue status
-        if: always()
         run: |
           git config user.name "sila-publisher"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python publisher.py ${{ inputs.command || 'loop' }}
+      - name: Save queue status
+        if: always() && (inputs.command || 'loop') == 'run'
+        run: |
           git add queue.json
-          git diff --cached --quiet || (git commit -m "Update publish status" && git push)
+          git diff --cached --quiet || (git commit -m "Update publish status" && git pull --rebase && git push)
+      - name: Start the next shift
+        if: ${{ !cancelled() && (inputs.command || 'loop') == 'loop' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publish.yml --ref ${{ github.ref_name }} -f command=loop
