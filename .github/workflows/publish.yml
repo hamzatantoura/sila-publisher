@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # ثابت: ubuntu-latest ينتقل إلى Ubuntu 26 في 19 تشرين الأول
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
