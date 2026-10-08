@@ -342,7 +342,13 @@
       "caption": "",
       "publish_at": "2026-10-08T10:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "published",
+      "last_try": "2026-10-08T07:01:58+00:00",
+      "result": {
+        "success": true,
+        "post_id": "1619083853280929"
+      },
+      "done_at": "2026-10-08T07:02:06+00:00"
     },
     {
       "id": "2026-10-08-instagram-post",
