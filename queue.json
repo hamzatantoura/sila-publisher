@@ -163,13 +163,19 @@
       "network": "facebook",
       "publish_at": "2026-10-11T10:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "published",
       "attempts": 0,
       "superseded": {
         "id": "1094550180153644",
         "fallback": "single-image: unpublished photos not permitted",
         "reset_by_owner": "2026-10-11"
-      }
+      },
+      "last_try": "2026-10-11T15:44:01+00:00",
+      "result": {
+        "id": "106327508973515_1101898989418763",
+        "post_supports_client_mutation_id": true
+      },
+      "done_at": "2026-10-11T15:44:19+00:00"
     },
     {
       "id": "2026-10-11-facebook-story",
