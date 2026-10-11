@@ -54,10 +54,10 @@ class PermanentError(Exception):
 def api(method, path, token, **params):
     params["access_token"] = token
     body = urllib.parse.urlencode(params)
-    if method == "GET":
-        req = urllib.request.Request(f"{GRAPH}/{path}?{body}")
-    else:
+    if method == "POST":
         req = urllib.request.Request(f"{GRAPH}/{path}", data=body.encode(), method="POST")
+    else:  # GET أو DELETE: المعاملات في الرابط
+        req = urllib.request.Request(f"{GRAPH}/{path}?{body}", method=method)
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
             return json.load(resp)
@@ -274,6 +274,33 @@ def actionable(item, now):
     return lead <= timedelta(0)
 
 
+def needs_unscheduling(item, now):
+    """كاروسيل فيسبوك جدوله الكود القديم (قبل 5 تشرين الأول) بصورة واحدة، وموعده لم يحن بعد.
+    تُحذف جدولته لدى Meta ويعود إلى الانتظار، فينشره الناشر كاملاً في موعده."""
+    return (item["network"] == "facebook" and item["kind"] == "post" and len(item["images"]) > 1
+            and item["status"] == "scheduled" and "fallback" in (item.get("result") or {})
+            and item.get("unschedule_attempts", 0) < MAX_ATTEMPTS
+            and when(item) - now > FB_SCHEDULE_MIN_LEAD)
+
+
+def unschedule(item, page_token):
+    """يحذف المنشور المجدول بصورة واحدة ويعيد العنصر إلى الانتظار. الحذف قبل التغيير: إن فشل بقي كما هو."""
+    old = item["result"]
+    try:
+        api("DELETE", old["id"], page_token)
+    except GraphError as e:
+        if "→ HTTP 4" not in str(e):
+            raise
+        # (#100) غير موجود: حُذف من قبل، فالمنشور المجدول لم يعد قائماً ويمكن المتابعة.
+        if "does not exist" not in str(e) and "(#100)" not in str(e):
+            raise
+    item["superseded"] = dict(old, unscheduled_at=datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    item["status"] = "pending"
+    item["attempts"] = 0
+    for k in ("result", "done_at", "error", "unschedule_attempts", "unschedule_error"):
+        item.pop(k, None)
+
+
 def alert(title, body):
     """يفتح Issue في المستودع، فيصل بريد GitHub إلى المالك. لا يوقف النشر إن فشل."""
     token, repo = os.environ.get("GITHUB_TOKEN"), os.environ.get("GITHUB_REPOSITORY")
@@ -294,11 +321,25 @@ def cmd_run():
     queue = load_queue()
     now = datetime.now(timezone.utc)
     due = [i for i in queue["items"] if actionable(i, now)]
-    if not due:
+    stale = [i for i in queue["items"] if needs_unscheduling(i, now)]
+    if not due and not stale:
         print("لا شيء للنشر الآن.")
         return 0
     page, page_token, ig_id, user_token = connect()
     failures = 0
+    for item in stale:
+        try:
+            unschedule(item, page_token)
+            print(f"↺ {item['id']}: حُذفت جدولة الصورة الواحدة؛ يُنشر كاروسيلاً في موعده")
+        except Exception as e:
+            item["unschedule_attempts"] = item.get("unschedule_attempts", 0) + 1
+            item["unschedule_error"] = str(e)[:600]
+            failures += 1
+            print(f"✗ {item['id']}: تعذّر حذف الجدولة: {e}")
+            if item["unschedule_attempts"] >= MAX_ATTEMPTS:
+                alert(f"تعذّر حذف جدولة {item['id']} بصورة واحدة",
+                      f"سيُنشر في موعده بصورة واحدة كما جُدول. الخطأ:\n\n```\n{item['unschedule_error']}\n```")
+        save_queue(queue)
     for item in due:
         t = when(item)
         lead = t - now
