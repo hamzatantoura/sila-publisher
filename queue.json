@@ -346,7 +346,12 @@
       "network": "instagram",
       "publish_at": "2026-10-15T21:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "published",
+      "last_try": "2026-10-15T18:00:22+00:00",
+      "result": {
+        "id": "17983223369901962"
+      },
+      "done_at": "2026-10-15T18:00:36+00:00"
     },
     {
       "id": "2026-10-15-instagram-story",
@@ -358,7 +363,12 @@
       "network": "instagram",
       "publish_at": "2026-10-15T21:00:00+03:00",
       "approved": true,
-      "status": "pending"
+      "status": "published",
+      "last_try": "2026-10-15T18:00:36+00:00",
+      "result": {
+        "id": "18143863753589150"
+      },
+      "done_at": "2026-10-15T18:00:49+00:00"
     },
     {
       "id": "2026-10-08-facebook-post",
