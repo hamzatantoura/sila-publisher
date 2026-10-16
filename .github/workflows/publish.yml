@@ -22,8 +22,10 @@ permissions:
   actions: write
   issues: write
 
+# الأوامر التي لا تلمس الطابور (videotest وwhoami وcheck) في مجموعة منفصلة: تعمل فوراً،
+# ولا تنتظر خلف مناوبة ولا تلغيها المناوبة التالية وهي في الانتظار.
 concurrency:
-  group: publish
+  group: ${{ contains(fromJSON('["videotest","whoami","check"]'), inputs.command) && 'publish-readonly' || 'publish' }}
   cancel-in-progress: false
 
 jobs:
