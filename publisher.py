@@ -274,13 +274,21 @@ def actionable(item, now):
     return lead <= timedelta(0)
 
 
+def withdrawn(item):
+    """منشور فيسبوك مجدول لدى Meta ثم سحب المالك موافقته (approved: false)."""
+    return not item.get("approved")
+
+
 def needs_unscheduling(item, now):
-    """كاروسيل فيسبوك جدوله الكود القديم (قبل 5 تشرين الأول) بصورة واحدة، وموعده لم يحن بعد.
-    تُحذف جدولته لدى Meta ويعود إلى الانتظار، فينشره الناشر كاملاً في موعده."""
-    return (item["network"] == "facebook" and item["kind"] == "post" and len(item["images"]) > 1
-            and item["status"] == "scheduled" and "fallback" in (item.get("result") or {})
+    """منشور فيسبوك مجدول لدى Meta وموعده لم يحن بعد، وفيه أحد أمرين: سحب المالك موافقته،
+    أو كاروسيل جدوله الكود القديم (قبل 5 تشرين الأول) بصورة واحدة.
+    تُحذف جدولته لدى Meta ويعود إلى الانتظار: المسحوب لا يُنشر حتى يُوافق عليه من جديد،
+    والكاروسيل يُنشر كاملاً في موعده."""
+    if not (item["network"] == "facebook" and item["kind"] == "post" and item["status"] == "scheduled"
             and item.get("unschedule_attempts", 0) < MAX_ATTEMPTS
-            and when(item) - now > FB_SCHEDULE_MIN_LEAD)
+            and when(item) - now > FB_SCHEDULE_MIN_LEAD):
+        return False
+    return withdrawn(item) or (len(item["images"]) > 1 and "fallback" in (item.get("result") or {}))
 
 
 def unschedule(item, page_token):
@@ -328,17 +336,26 @@ def cmd_run():
     page, page_token, ig_id, user_token = connect()
     failures = 0
     for item in stale:
+        was_withdrawn = withdrawn(item)
         try:
             unschedule(item, page_token)
-            print(f"↺ {item['id']}: حُذفت جدولة الصورة الواحدة؛ يُنشر كاروسيلاً في موعده")
+            if was_withdrawn:
+                print(f"↺ {item['id']}: سحب المالك موافقته؛ حُذفت جدولته لدى Meta ولن يُنشر")
+            else:
+                print(f"↺ {item['id']}: حُذفت جدولة الصورة الواحدة؛ يُنشر كاروسيلاً في موعده")
         except Exception as e:
             item["unschedule_attempts"] = item.get("unschedule_attempts", 0) + 1
             item["unschedule_error"] = str(e)[:600]
             failures += 1
             print(f"✗ {item['id']}: تعذّر حذف الجدولة: {e}")
             if item["unschedule_attempts"] >= MAX_ATTEMPTS:
-                alert(f"تعذّر حذف جدولة {item['id']} بصورة واحدة",
-                      f"سيُنشر في موعده بصورة واحدة كما جُدول. الخطأ:\n\n```\n{item['unschedule_error']}\n```")
+                if was_withdrawn:
+                    alert(f"تعذّر إلغاء جدولة {item['id']} بعد سحب الموافقة",
+                          "ما زال مجدولاً لدى Meta وسيُنشر في موعده. احذفه يدوياً من Meta Business Suite "
+                          f"← المنشورات المجدولة. الخطأ:\n\n```\n{item['unschedule_error']}\n```")
+                else:
+                    alert(f"تعذّر حذف جدولة {item['id']} بصورة واحدة",
+                          f"سيُنشر في موعده بصورة واحدة كما جُدول. الخطأ:\n\n```\n{item['unschedule_error']}\n```")
         save_queue(queue)
     for item in due:
         t = when(item)
