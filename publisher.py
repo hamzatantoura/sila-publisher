@@ -1,9 +1,11 @@
 """ناشر صلة — ينشر منشورات queue.json على صفحة فيسبوك وحساب إنستغرام عبر Meta Graph API.
+الأنواع: post (صورة أو كاروسيل)، story (صورة)، reel (فيديو mp4 في الحقل video).
 
 الأوامر:
-  python publisher.py check    فحص الطابور والصور بلا اتصال بـ Meta
+  python publisher.py check    فحص الطابور والصور والفيديو بلا اتصال بـ Meta
   python publisher.py whoami   فحص المفتاح: اسم الصفحة وحساب إنستغرام وحصة النشر
   python publisher.py run      نشر أو جدولة ما حان وقته، مرة واحدة
+  python publisher.py videotest  اختبار رفع ريلز media/test/reel-test.mp4 بلا نشر
   python publisher.py loop     «مناوبة»: يكرر run كل دقيقتين قرابة 5 ساعات ونصف، ويحفظ الحالة
                                في المستودع بعد كل تغيير. يشغّله GitHub Actions، وكل مناوبة تبدأ التالية.
 
@@ -94,6 +96,43 @@ def media_url(path):
     return base + "/" + urllib.parse.quote(path)
 
 
+def rupload(url, token, path):
+    """يرفع ملف الفيديو نفسه إلى خادم رفع Meta. لا نعطي Meta رابطاً: GitHub يقدّم ملفات mp4
+    بنوع application/octet-stream، فالرفع المباشر أضمن."""
+    with open(os.path.join(ROOT, path), "rb") as f:
+        data = f.read()
+    req = urllib.request.Request(url, data=data, method="POST", headers={
+        "Authorization": f"OAuth {token}", "offset": "0", "file_size": str(len(data))})
+    try:
+        with urllib.request.urlopen(req, timeout=600) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode(errors="replace")[:600]
+        raise GraphError(f"رفع {path} → HTTP {e.code}: {detail}") from None
+
+
+def mp4_info(path):
+    """(العرض، الارتفاع، المدة بالثواني) من صندوقَي mvhd وtkhd، بلا مكتبات خارجية. None إن تعذّر."""
+    with open(path, "rb") as f:
+        data = f.read()
+    i = data.find(b"mvhd")
+    if i < 0:
+        return None
+    v = i + 4
+    if data[v] == 1:
+        scale, dur = struct.unpack(">IQ", data[v + 20:v + 32])
+    else:
+        scale, dur = struct.unpack(">II", data[v + 12:v + 20])
+    w = h = 0
+    j = data.find(b"tkhd")
+    while j >= 0 and not w:
+        v = j + 4
+        off = 88 if data[v] == 1 else 76
+        w, h = (x >> 16 for x in struct.unpack(">II", data[v + off:v + off + 8]))
+        j = data.find(b"tkhd", j + 4)
+    return (w, h, dur / scale) if scale and w else None
+
+
 # ---------- فيسبوك ----------
 
 def fb_upload_photo(page_id, token, path, **extra):
@@ -128,6 +167,16 @@ def fb_post(page_id, token, item, schedule_ts=None):
         return res
 
 
+def fb_reel(page_id, token, item, state="PUBLISHED"):
+    """ريلز فيسبوك: بدء الرفع، رفع الملف، ثم الإنهاء بالحالة المطلوبة (PUBLISHED أو DRAFT للاختبار)."""
+    start = api("POST", f"{page_id}/video_reels", token, upload_phase="start")
+    rupload(start["upload_url"], token, item["video"])
+    res = api("POST", f"{page_id}/video_reels", token, upload_phase="finish",
+              video_id=start["video_id"], video_state=state, description=item.get("caption", ""))
+    res["video_id"] = start["video_id"]
+    return res
+
+
 def fb_story(page_id, token, item):
     try:
         photo_id = fb_upload_photo(page_id, token, item["images"][0])
@@ -141,18 +190,30 @@ def fb_story(page_id, token, item):
 
 # ---------- إنستغرام ----------
 
-def ig_wait(container_id, token):
-    for _ in range(30):
-        status = api("GET", container_id, token, fields="status_code").get("status_code")
+def ig_wait(container_id, token, tries=30, every=5):
+    for _ in range(tries):
+        info = api("GET", container_id, token, fields="status_code,status")
+        status = info.get("status_code")
         if status == "FINISHED":
             return
         if status in ("ERROR", "EXPIRED"):
-            raise GraphError(f"حاوية إنستغرام {container_id} حالتها {status}")
-        time.sleep(5)
-    raise GraphError(f"حاوية إنستغرام {container_id} لم تجهز خلال دقيقتين ونصف")
+            raise GraphError(f"حاوية إنستغرام {container_id} حالتها {status}: {info.get('status', '')}")
+        time.sleep(every)
+    raise GraphError(f"حاوية إنستغرام {container_id} لم تجهز خلال {tries * every // 60} دقيقة")
+
+
+def ig_reel_container(ig_id, token, item):
+    """حاوية ريلز إنستغرام برفع مباشر للملف، تنتظر حتى تنتهي معالجة الفيديو (حتى 10 دقائق)."""
+    res = api("POST", f"{ig_id}/media", token, media_type="REELS", upload_type="resumable",
+              caption=item.get("caption", ""), share_to_feed="true")
+    rupload(res["uri"], token, item["video"])
+    ig_wait(res["id"], token, tries=60, every=10)
+    return res["id"]
 
 
 def ig_publish(ig_id, token, item):
+    if item["kind"] == "reel":
+        return api("POST", f"{ig_id}/media_publish", token, creation_id=ig_reel_container(ig_id, token, item))
     images = item["images"]
     if item["kind"] == "story":
         cid = api("POST", f"{ig_id}/media", token, media_type="STORIES", image_url=media_url(images[0]))["id"]
@@ -207,6 +268,30 @@ def jpeg_size(path):
     return None
 
 
+def check_reel(item):
+    """حدود Meta للريلز: فيسبوك 3–90 ثانية بنسبة 9:16 وعرض 540 على الأقل؛ إنستغرام 3 ثوانٍ إلى 15 دقيقة."""
+    p = item.get("video")
+    if not p:
+        return ["الريلز بلا ملف فيديو (video)"]
+    full = os.path.join(ROOT, p)
+    if not os.path.exists(full):
+        return [f"الفيديو غير موجود: {p}"]
+    if not p.lower().endswith(".mp4"):
+        return [f"الفيديو ليس mp4: {p}"]
+    issues = []
+    if os.path.getsize(full) > 95 * 1024 * 1024:
+        issues.append(f"الفيديو أكبر من 95MB (حد GitHub 100MB): {p}")
+    info = mp4_info(full)
+    if not info:
+        return issues + [f"تعذّرت قراءة أبعاد الفيديو ومدته: {p}"]
+    w, h, secs = info
+    if not 0.55 <= w / h <= 0.58 or w < 540:
+        issues.append(f"أبعاد الفيديو {w}×{h}؛ الريلز يحتاج 9:16 بعرض 540 على الأقل: {p}")
+    if not 3 <= secs <= 90:
+        issues.append(f"مدة الفيديو {secs:.1f} ثانية؛ ريلز فيسبوك من 3 إلى 90 ثانية: {p}")
+    return issues
+
+
 def cmd_check():
     queue = load_queue()
     problems = 0
@@ -236,8 +321,10 @@ def cmd_check():
                     issues.append(f"نسبة أبعاد غير مقبولة في إنستغرام {size}: {p}")
             if os.path.getsize(full) > 8 * 1024 * 1024:
                 issues.append(f"الصورة أكبر من 8MB: {p}")
+        if item["kind"] == "reel":
+            issues += check_reel(item)
         cap = item.get("caption", "")
-        if item["kind"] == "post" and not cap:
+        if item["kind"] in ("post", "reel") and not cap:
             issues.append("المنشور بلا نص")
         if len(cap) > 2200 or cap.count("#") > 30:
             issues.append("النص أطول من حدود إنستغرام")
@@ -253,7 +340,7 @@ def cmd_check():
 
 def schedulable_on_meta(item):
     """منشور فيسبوك بصورة واحدة فقط يُجدول على خوادم Meta مسبقاً."""
-    return item["network"] == "facebook" and item["kind"] == "post" and len(item["images"]) == 1
+    return item["network"] == "facebook" and item["kind"] == "post" and len(item.get("images", [])) == 1
 
 
 def actionable(item, now):
@@ -374,6 +461,9 @@ def cmd_run():
                 alert(f"لم يُنشر {item['id']}", item["error"])
                 save_queue(queue)
                 continue
+            elif item["network"] == "facebook" and item["kind"] == "reel":
+                res = fb_reel(page["id"], page_token, item)
+                item["status"] = "published"
             elif item["network"] == "facebook" and item["kind"] == "post":
                 res = fb_post(page["id"], page_token, item)
                 item["status"] = "published"
@@ -403,6 +493,32 @@ def cmd_run():
                 alert(f"فشل نشر {item['id']}", f"بعد {item['attempts']} محاولات:\n\n```\n{item['error']}\n```")
         save_queue(queue)
     return 1 if failures else 0
+
+
+REEL_TEST = "media/test/reel-test.mp4"
+
+
+def cmd_videotest():
+    """اختبار رفع الريلز بلا نشر: حاوية إنستغرام تُعالَج ولا تُنشر (تنتهي بعد 24 ساعة)،
+    وريلز فيسبوك يُرفع مسودة ثم يُحذف. لا يظهر شيء للمتابعين."""
+    page, page_token, ig_id, user_token = connect()
+    item = {"video": REEL_TEST, "caption": "اختبار رفع — لا يُنشر"}
+    failed = 0
+    try:
+        cid = ig_reel_container(ig_id, user_token, item)
+        print(f"✓ إنستغرام: الحاوية {cid} جاهزة (FINISHED)، ولم تُنشر")
+    except Exception as e:
+        failed += 1
+        print(f"✗ إنستغرام: {e}")
+    try:
+        res = fb_reel(page["id"], page_token, item, state="DRAFT")
+        print(f"✓ فيسبوك: رُفع الريلز مسودة {res}")
+        api("DELETE", res["video_id"], page_token)
+        print("✓ فيسبوك: حُذفت المسودة")
+    except Exception as e:
+        failed += 1
+        print(f"✗ فيسبوك: {e}")
+    return 1 if failed else 0
 
 
 # ---------- المناوبة ----------
@@ -453,7 +569,8 @@ def cmd_loop():
 
 
 if __name__ == "__main__":
-    commands = {"check": cmd_check, "run": cmd_run, "whoami": cmd_whoami, "loop": cmd_loop}
+    commands = {"check": cmd_check, "run": cmd_run, "whoami": cmd_whoami, "loop": cmd_loop,
+                "videotest": cmd_videotest}
     if len(sys.argv) != 2 or sys.argv[1] not in commands:
         print(__doc__)
         sys.exit(2)

@@ -12,9 +12,9 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: "loop = مناوبة متصلة، run = مرة واحدة، whoami = فحص المفتاح، check = فحص الطابور"
+        description: "loop = مناوبة متصلة، run = مرة واحدة، whoami = فحص المفتاح، check = فحص الطابور، videotest = اختبار رفع ريلز بلا نشر"
         type: choice
-        options: [loop, run, whoami, check]
+        options: [loop, run, whoami, check, videotest]
         default: loop
 
 permissions:
