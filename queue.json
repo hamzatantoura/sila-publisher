@@ -804,9 +804,17 @@
       "caption": "تبحث في كل مرة عن شركة شحن توصل إلى منطقة زبونك؟\nلا توجد شركة شحن واحدة توصل إلى كل المحافظات.\nفي صلة تكتب عنوان زبونك، فتظهر لك الشركات التي توصل إليه، وأنت تختار.\nسجّل حسابك من الموقع.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تجارة_إلكترونية",
       "publish_at": "2026-10-17T21:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "published",
       "source": "التغطية مقيسة 2026-10-17 (couriers.is_active + courier_area_coverage.is_active): الحسكة ← الفاتح وترابط ومرسال؛ معاً 14 من 14؛ البند 79 ✅",
-      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)"
+      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)",
+      "last_try": "2026-10-17T18:01:58+00:00",
+      "result": {
+        "success": true,
+        "message": "Video is Processing. To check the status of the video, please follow the instructions listed at https://developers.facebook.com/docs/video-api/guides/reels-publishing#get-the-upload-status.",
+        "post_id": "1107932372148758",
+        "video_id": "1430801493448428"
+      },
+      "done_at": "2026-10-17T18:02:04+00:00"
     },
     {
       "id": "2026-10-17-instagram-reel",
@@ -816,9 +824,14 @@
       "caption": "تبحث في كل مرة عن شركة شحن توصل إلى منطقة زبونك؟\nلا توجد شركة شحن واحدة توصل إلى كل المحافظات.\nفي صلة تكتب عنوان زبونك، فتظهر لك الشركات التي توصل إليه، وأنت تختار.\nسجّل حسابك من الموقع.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تجارة_إلكترونية",
       "publish_at": "2026-10-17T21:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "published",
       "source": "التغطية مقيسة 2026-10-17 (couriers.is_active + courier_area_coverage.is_active): الحسكة ← الفاتح وترابط ومرسال؛ معاً 14 من 14؛ البند 79 ✅",
-      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)"
+      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)",
+      "last_try": "2026-10-17T18:02:04+00:00",
+      "result": {
+        "id": "18117973582785805"
+      },
+      "done_at": "2026-10-17T18:02:39+00:00"
     },
     {
       "id": "2026-10-18-facebook-reel",
