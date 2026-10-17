@@ -1,0 +1,34 @@
+name: videotest
+
+# اختبار رفع الريلز بلا نشر (publisher.py videotest). يبدأ وحده عند دفع أي تغيير إلى media/test/،
+# فيشغّله من يملك صلاحية الدفع فقط، بلا زر ولا مفتاح إضافي. الفشل يفتح Issue فيه الخطأ.
+on:
+  push:
+    branches: [main]
+    paths: [media/test/**, .github/workflows/videotest.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: publish-readonly
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Upload a test reel without publishing
+        env:
+          META_TOKEN: ${{ secrets.META_TOKEN }}
+          PAGE_ID: ${{ vars.PAGE_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PYTHONIOENCODING: utf-8
+        run: python publisher.py videotest

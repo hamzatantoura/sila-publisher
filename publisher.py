@@ -503,12 +503,12 @@ def cmd_videotest():
     وريلز فيسبوك يُرفع مسودة ثم يُحذف. لا يظهر شيء للمتابعين."""
     page, page_token, ig_id, user_token = connect()
     item = {"video": REEL_TEST, "caption": "اختبار رفع — لا يُنشر"}
-    failed = 0
+    errors = []
     try:
         cid = ig_reel_container(ig_id, user_token, item)
         print(f"✓ إنستغرام: الحاوية {cid} جاهزة (FINISHED)، ولم تُنشر")
     except Exception as e:
-        failed += 1
+        errors.append(f"إنستغرام: {e}")
         print(f"✗ إنستغرام: {e}")
     try:
         res = fb_reel(page["id"], page_token, item, state="DRAFT")
@@ -516,9 +516,12 @@ def cmd_videotest():
         api("DELETE", res["video_id"], page_token)
         print("✓ فيسبوك: حُذفت المسودة")
     except Exception as e:
-        failed += 1
+        errors.append(f"فيسبوك: {e}")
         print(f"✗ فيسبوك: {e}")
-    return 1 if failed else 0
+    if errors:
+        # سجل Actions لا يُقرأ بلا تسجيل دخول؛ الـIssue يُقرأ من الواجهة العامة.
+        alert("فشل اختبار رفع الريلز", "\n\n".join(f"```\n{s}\n```" for s in errors))
+    return 1 if errors else 0
 
 
 # ---------- المناوبة ----------
