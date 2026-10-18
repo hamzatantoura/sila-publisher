@@ -841,9 +841,17 @@
       "caption": "شحنة مع شركة، وشحنة مع شركة أخرى… أين وصلت كل واحدة؟\nعلى صلة تجد شحناتك مع كل الشركات في مكان واحد، وتعرف حالة كل شحنة.\nسجّل حسابك من الموقع.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تتبع_الشحنات",
       "publish_at": "2026-10-18T21:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "published",
       "source": "الشعارات الظاهرة (الفاتح، ترابط، مرسال، كرم، Deliveroo Joud) فعّالة 2026-10-17؛ بلا «لحظي/مباشر» (قرار المالك 23/09)",
-      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)"
+      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)",
+      "last_try": "2026-10-18T18:01:49+00:00",
+      "result": {
+        "success": true,
+        "message": "Video is Processing. To check the status of the video, please follow the instructions listed at https://developers.facebook.com/docs/video-api/guides/reels-publishing#get-the-upload-status.",
+        "post_id": "1108905785384750",
+        "video_id": "1864297391618403"
+      },
+      "done_at": "2026-10-18T18:01:58+00:00"
     },
     {
       "id": "2026-10-18-instagram-reel",
@@ -853,9 +861,14 @@
       "caption": "شحنة مع شركة، وشحنة مع شركة أخرى… أين وصلت كل واحدة؟\nعلى صلة تجد شحناتك مع كل الشركات في مكان واحد، وتعرف حالة كل شحنة.\nسجّل حسابك من الموقع.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تتبع_الشحنات",
       "publish_at": "2026-10-18T21:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "published",
       "source": "الشعارات الظاهرة (الفاتح، ترابط، مرسال، كرم، Deliveroo Joud) فعّالة 2026-10-17؛ بلا «لحظي/مباشر» (قرار المالك 23/09)",
-      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)"
+      "approved_note": "videotest نجح 2026-10-17 00:02 UTC (run 38984451263)",
+      "last_try": "2026-10-18T18:01:58+00:00",
+      "result": {
+        "id": "18107058116193269"
+      },
+      "done_at": "2026-10-18T18:02:34+00:00"
     }
   ]
 }
