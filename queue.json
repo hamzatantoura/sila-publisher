@@ -953,9 +953,17 @@
       "caption": "قبل صلة: لكل شركة شحن حساب، وكشف، ومحاسبة منفصلة، ومع كل طلب تسأل: من يوصل؟ وكم يكلّف؟ وأين وصلت الشحنة؟\nمع صلة: جميع الشركات في منصة واحدة، تختار الأنسب لكل طلب بأجور شحن أقل، وتتابع شحناتك من شاشة واحدة، وتُقيَّد مبالغ طلباتك في محفظة واحدة.\nسجّل حسابك من الموقع.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تجارة_إلكترونية",
       "publish_at": "2026-10-26T21:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "published",
       "source": "حملة «شو هي صلة؟» 24/10: المصادر في منشورات-صلة/حملة-التوعية/جدول-الحملة.md وصور-الحملة/نصوص-المنشورات.md",
-      "approved_note": "المالك 24/10: «نعم» على جدول الحملة"
+      "approved_note": "المالك 24/10: «نعم» على جدول الحملة",
+      "last_try": "2026-10-26T18:00:48+00:00",
+      "result": {
+        "success": true,
+        "message": "Video is Processing. To check the status of the video, please follow the instructions listed at https://developers.facebook.com/docs/video-api/guides/reels-publishing#get-the-upload-status.",
+        "post_id": "1116483404626988",
+        "video_id": "4133217320311569"
+      },
+      "done_at": "2026-10-26T18:01:00+00:00"
     },
     {
       "id": "2026-10-26-instagram-reel-awareness",
@@ -965,9 +973,12 @@
       "caption": "قبل صلة: لكل شركة شحن حساب، وكشف، ومحاسبة منفصلة، ومع كل طلب تسأل: من يوصل؟ وكم يكلّف؟ وأين وصلت الشحنة؟\nمع صلة: جميع الشركات في منصة واحدة، تختار الأنسب لكل طلب بأجور شحن أقل، وتتابع شحناتك من شاشة واحدة، وتُقيَّد مبالغ طلباتك في محفظة واحدة.\nسجّل حسابك من الموقع.\n\nsila-sy.com\n\n#صلة #شحن_سوريا #تجارة_إلكترونية",
       "publish_at": "2026-10-26T21:00:00+03:00",
       "approved": true,
-      "status": "pending",
+      "status": "failed",
       "source": "حملة «شو هي صلة؟» 24/10: المصادر في منشورات-صلة/حملة-التوعية/جدول-الحملة.md وصور-الحملة/نصوص-المنشورات.md",
-      "approved_note": "المالك 24/10: «نعم» على جدول الحملة"
+      "approved_note": "المالك 24/10: «نعم» على جدول الحملة",
+      "last_try": "2026-10-26T18:01:00+00:00",
+      "attempts": 1,
+      "error": "رفع media/awareness-20261025/sila-reel-20261026-before-after.mp4 → HTTP 400: {\"debug_info\":{\"retriable\":false,\"type\":\"ProcessingFailedError\",\"message\":\"Request processing failed\"}}"
     },
     {
       "id": "2026-10-27-facebook-post-awareness",
