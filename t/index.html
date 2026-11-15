@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>اختبار الاتصال - صلة</title>
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:#f6f7f9;color:#1b1f24;margin:0;padding:16px}
+  h1{font-size:22px;margin:4px 0 4px}
+  .sub{color:#555;font-size:14px;margin-bottom:14px}
+  .row{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:2px solid #ddd;font-size:17px}
+  .row b{display:block;margin-bottom:4px}
+  .ok{border-color:#1a9c4b;background:#eefaf2}
+  .bad{border-color:#d33;background:#fdeeee}
+  .wait{border-color:#bbb}
+  .res{font-size:16px}
+  #sum{font-size:18px;font-weight:bold;padding:14px;border-radius:12px;background:#fff;margin:14px 0}
+  button{font-size:18px;padding:12px 20px;border-radius:10px;border:0;background:#1b4fd8;color:#fff;width:100%}
+  .meta{color:#666;font-size:13px;margin-top:12px;direction:ltr;text-align:left}
+</style>
+</head>
+<body>
+<h1>اختبار الاتصال بصلة</h1>
+<div class="sub">لا تشغّل VPN. انتظر حتى تنتهي الاختبارات ثم خذ لقطة شاشة وأرسلها.</div>
+
+<div class="row ok" id="r0"><b>١. هذه الصفحة (من GitHub)</b><span class="res">✅ وصلت</span></div>
+<div class="row wait" id="r1"><b>٢. تحميل ملف كبير من GitHub</b><span class="res">⏳ جارٍ الاختبار…</span></div>
+<div class="row wait" id="r2"><b>٣. موقع صلة sila-sy.com</b><span class="res">⏳ جارٍ الاختبار…</span></div>
+<div class="row wait" id="r3"><b>٤. قاعدة بيانات صلة</b><span class="res">⏳ جارٍ الاختبار…</span></div>
+
+<div id="sum">⏳ انتظر…</div>
+<button onclick="run()">أعد الاختبار</button>
+<div class="meta" id="meta"></div>
+
+<script>
+var LIMIT = 20000;
+function set(id, ok, text){
+  var el = document.getElementById(id);
+  el.className = 'row ' + (ok ? 'ok' : 'bad');
+  el.querySelector('.res').textContent = (ok ? '✅ ' : '❌ ') + text;
+}
+function probe(url, opts){
+  var t0 = performance.now();
+  var ctl = new AbortController();
+  var timer = setTimeout(function(){ ctl.abort(); }, LIMIT);
+  opts = opts || {};
+  opts.signal = ctl.signal; opts.cache = 'no-store';
+  return fetch(url, opts).then(function(r){
+    return (opts.mode === 'no-cors' ? Promise.resolve(0) : r.arrayBuffer().then(function(b){ return b.byteLength; }));
+  }).then(function(size){
+    clearTimeout(timer);
+    return {ok:true, ms:Math.round(performance.now()-t0), size:size};
+  }).catch(function(e){
+    clearTimeout(timer);
+    return {ok:false, ms:Math.round(performance.now()-t0), timeout:e && e.name==='AbortError'};
+  });
+}
+function sec(ms){ return (ms/1000).toFixed(1) + ' ثانية'; }
+function fail(r){ return r.timeout ? 'لم يصل أي رد خلال ' + sec(LIMIT) : 'فشل الاتصال بعد ' + sec(r.ms); }
+function run(){
+  ['r1','r2','r3'].forEach(function(id){
+    var el=document.getElementById(id); el.className='row wait'; el.querySelector('.res').textContent='⏳ جارٍ الاختبار…';
+  });
+  document.getElementById('sum').textContent='⏳ انتظر…';
+  var q = '?t=' + Date.now();
+  var started = new Date();
+  Promise.all([
+    probe('big.js' + q),
+    probe('https://sila-sy.com/robots.txt' + q, {mode:'no-cors'}),
+    probe('https://qhdhjzyduwzqutmialgp.supabase.co/auth/v1/health' + q, {mode:'no-cors'})
+  ]).then(function(rs){
+    var a=rs[0], b=rs[1], c=rs[2];
+    set('r1', a.ok, a.ok ? 'وصل كاملًا خلال ' + sec(a.ms) : fail(a));
+    set('r2', b.ok, b.ok ? 'وصل خلال ' + sec(b.ms) : fail(b));
+    set('r3', c.ok, c.ok ? 'وصلت خلال ' + sec(c.ms) : fail(c));
+    var s = document.getElementById('sum');
+    if (a.ok && !b.ok) s.textContent = 'النتيجة: GitHub يعمل وموقع صلة الحالي لا يصل ← نقل الموقع يحل المشكلة';
+    else if (a.ok && b.ok) s.textContent = 'النتيجة: كل شيء يصل الآن. إذا ظهرت المشكلة لاحقًا أعد الاختبار وقتها';
+    else s.textContent = 'النتيجة: حتى GitHub لا يصل ← المشكلة في الاتصال نفسه';
+    document.getElementById('meta').textContent =
+      started.toISOString() + ' | big=' + (a.ok?a.ms:'X') + ' sila=' + (b.ok?b.ms:'X') + ' db=' + (c.ok?c.ms:'X') +
+      ' | ' + (navigator.connection && navigator.connection.effectiveType || '') + ' | ' + navigator.userAgent.slice(0,90);
+  });
+}
+run();
+</script>
+</body>
+</html>
