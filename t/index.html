@@ -30,6 +30,7 @@
 <div class="row wait" id="r3"><b>٤. قاعدة بيانات صلة</b><span class="res">⏳ جارٍ الاختبار…</span></div>
 <div class="row wait" id="r4"><b>٥. عنوان Lovable الثاني (lovable.app)</b><span class="res">⏳ جارٍ الاختبار…</span></div>
 <div class="row wait" id="r5"><b>٦. شبكة Cloudflare</b><span class="res">⏳ جارٍ الاختبار…</span></div>
+<div class="row wait" id="r6"><b>٧. عناوين Cloudflare التي سيأخذها موقع صلة</b><span class="res">⏳ جارٍ الاختبار…</span></div>
 
 <div id="sum">⏳ انتظر…</div>
 <button onclick="run()">أعد الاختبار</button>
@@ -61,7 +62,7 @@ function probe(url, opts){
 function sec(ms){ return (ms/1000).toFixed(1) + ' ثانية'; }
 function fail(r){ return r.timeout ? 'لم يصل أي رد خلال ' + sec(LIMIT) : 'فشل الاتصال بعد ' + sec(r.ms); }
 function run(){
-  ['r1','r2','r3','r4','r5'].forEach(function(id){
+  ['r1','r2','r3','r4','r5','r6'].forEach(function(id){
     var el=document.getElementById(id); el.className='row wait'; el.querySelector('.res').textContent='⏳ جارٍ الاختبار…';
   });
   document.getElementById('sum').textContent='⏳ انتظر…';
@@ -72,9 +73,14 @@ function run(){
     probe('https://sila-sy.com/robots.txt' + q, {mode:'no-cors'}),
     probe('https://qhdhjzyduwzqutmialgp.supabase.co/auth/v1/health' + q, {mode:'no-cors'}),
     probe('https://id-preview--4cc573ce-b74b-4372-925b-61fa7516f3dd.lovable.app/robots.txt' + q, {mode:'no-cors'}),
-    probe('https://www.cloudflare.com/cdn-cgi/trace' + q, {mode:'no-cors'})
+    probe('https://www.cloudflare.com/cdn-cgi/trace' + q, {mode:'no-cors'}),
+    // Sites on Cloudflare's shared ranges (104.21.x / 172.67.x), where a new free zone lands.
+    probe('https://unblocksyria.com/cdn-cgi/trace' + q, {mode:'no-cors'}),
+    probe('https://techissues.com.br/cdn-cgi/trace' + q, {mode:'no-cors'})
   ]).then(function(rs){
-    var a=rs[0], b=rs[1], c=rs[2], d=rs[3], e=rs[4];
+    var a=rs[0], b=rs[1], c=rs[2], d=rs[3], e=rs[4], f=rs[5], g=rs[6];
+    var fg = f.ok && g.ok;
+    set('r6', fg, fg ? 'وصلت خلال ' + sec(Math.max(f.ms, g.ms)) : (f.ok || g.ok ? 'وصل أحد العنوانين فقط' : fail(f.ok ? g : f)));
     set('r4', d.ok, d.ok ? 'وصل خلال ' + sec(d.ms) : fail(d));
     set('r5', e.ok, e.ok ? 'وصلت خلال ' + sec(e.ms) : fail(e));
     set('r1', a.ok, a.ok ? 'وصل كاملًا خلال ' + sec(a.ms) : fail(a));
@@ -85,7 +91,7 @@ function run(){
     else if (a.ok && b.ok) s.textContent = 'النتيجة: كل شيء يصل الآن. إذا ظهرت المشكلة لاحقًا أعد الاختبار وقتها';
     else s.textContent = 'النتيجة: حتى GitHub لا يصل ← المشكلة في الاتصال نفسه';
     document.getElementById('meta').textContent =
-      started.toISOString() + ' | big=' + (a.ok?a.ms:'X') + ' sila=' + (b.ok?b.ms:'X') + ' db=' + (c.ok?c.ms:'X') + ' lapp=' + (d.ok?d.ms:'X') + ' cf=' + (e.ok?e.ms:'X') +
+      started.toISOString() + ' | big=' + (a.ok?a.ms:'X') + ' sila=' + (b.ok?b.ms:'X') + ' db=' + (c.ok?c.ms:'X') + ' lapp=' + (d.ok?d.ms:'X') + ' cf=' + (e.ok?e.ms:'X') + ' cfz=' + (f.ok?f.ms:'X') + '/' + (g.ok?g.ms:'X') +
       ' | ' + (navigator.connection && navigator.connection.effectiveType || '') + ' | ' + navigator.userAgent.slice(0,90);
   });
 }
